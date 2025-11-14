@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# FishIDE, a perfect IDE made in GNU Nano 8.6 in BASH specifcially FISH Terminal
-# FishIDE Version 1, Beta.
+# FishIDE, a perfect IDE made in GNU Nano 8.7 in BASH specifcially FISH Terminal
+# FishIDE Version 2. full release.
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-# Colors
+#COLORS
 FISHIDE_COLOR="\e[38;2;0;166;255m"
 FISHIDE_BORDER="\e[38;2;0;119;204m"
 FISHIDE_HIGHLIGHT="\e[38;2;51;207;255m"
@@ -18,36 +18,42 @@ echo -e "${FISHIDE_HIGHLIGHT} 🐟🐟🐟🐟🐟🐟🐟🐟🐟🐟🐟🐟�
 echo
 #--------------------------------------------------------
 
-#COMMANDS
-print() { echo "$@"; }
-makefile() { mkdir "$1"; }
-goto() { cd "$1" || Print "Directory not found"; }
+#COMMANDS // FishScript
+
+print() { echo "$@"; } #prints
+
+makefile() { mkdir "$1"; } #makes a file
+
+goto() { cd "$1"|| Print "Directory not found"; } # changes directory.
+
 goback() {
     steps=${1:-1}
     for ((i=0; i<steps; i++)); do
         cd ..
     done
-}
-delete() { rm -rf "$1"; }
-close() { exit; }
-wait() { sleep "$1"; }
-view() { ls; }
-math() {
-    echo "$(( $* ))"
-}
-update() {
-    sudo pacman -Syu
-}
-get() { git "$@"; }
+} ## goes back a directory goback 2
+ 
+delete() { sudo rm -rf "$1"; } #Force **DELETES** everything.
 
-install() {
-  sudo pacman -S "$@"
-}
+close() { exit; } #closes / exits the terminal
 
-#for get
-FishApps() {
-  sudo pacman -S "git"
-}
-# |--------------------------------------------------->
-# |  -!- CODE WORKSPACE AREA -!- CODE WORKSPACE AREA ->
-# |--------------------------------------------------->
+wait() { sleep "$1"; } #waits
+
+view() { ls; } # LS
+
+math() { echo "$(( $* ))" } #Math.
+ 
+update() { sudo pacman -Syu } #Updates system
+ 
+get() { git clone "$@"; } #uses Git to GET stuff
+
+install() { sudo pacman -S "$@" } # Installs using pm (can change)
+
+run() { chmod +x "$1" && ./"$1"; } #runs any shell / bash script.
+
+
+# |--------------------------------------------------------| #
+# |  -!- CODE WORKSPACE AREA -!- CODE WORKSPACE AREA -!-   | #
+# |--------------------------------------------------------| #
+##############################################################
+# CODE HERE TO START FISHING !!
