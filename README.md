@@ -1,7 +1,7 @@
 ### FISH ###
-Fast Interactable SHell v2
+Fast Interactable SHell v3
 
 
-C language support
-game support
-web support
+everything in capitals
+added ; for better uniqueness.
+better banner.
