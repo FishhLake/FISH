@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# FISH v2 ;; 
+# FISH v3 ;; 
 
 # STARTING DIRECTORY ;; 
 
@@ -23,7 +23,7 @@ FISH_WARN="\e[38;2;200;150;40m"
     cols=$(tput cols)
     line="${FISH_BORDER}$(printf '─%.0s' $(seq 1 $cols))${RESET}"
 
-    title="Welcome to FISH v2"
+    title="Welcome to FISH v3"
     subtitle="Lightweight • Fast • Scriptable • 2025"
 
     title_pad=$(( (cols - ${#title}) / 2 ))
@@ -125,45 +125,46 @@ get() { git clone "$@" && ok "cloned repo" || err "clone failed"; }
 
 install() { sudo pacman -S "$@" && ok "installed" || err "install failed"; }
 
+uninstall() {
+    if [ $# -eq 0 ]; then
+        err "usage: uninstall <package>"
+        return 1
+    fi
+    sudo pacman -Rdd "$@" && ok "uninstalled" || err "uninstall failed"
+}
+
 execute() {
     file="$1"
 
-    # C ;; 
     if [[ -z "$file" ]]; then
         echo "Usage: run <file>"
         return 1
     fi
 
     if [[ "$file" == *.c ]]; then
-    out="${file%.c}"
+        out="${file%.c}"
 
-    echo "[FISH] Compiling $file..."
-    if gcc "$file" -o "$out" -lm; then
-        echo "[FISH] Running $out..."
-        "./$out"
-    else
-        echo "[FISH] Compilation failed."
+        echo "[FISH] Compiling $file..."
+        if gcc "$file" -o "$out" -lm; then
+            echo "[FISH] Running $out..."
+            "./$out"
+        else
+            echo "[FISH] Compilation failed."
+        fi
+        return
     fi
-    return
-fi
 
-
-    # SHELL SCRIPT ;; 
     if [[ "$file" == *.sh ]]; then
         bash "$file"
         return
     fi
 
-    # PYTHON ;; 
     if [[ "$file" == *.py ]]; then
         python3 "$file"
         return
     fi
 
-    echo "[FISH] Unknown file type: $file"
 }
-
-
 copy() { cp "$1" "$2" && ok "copied" || err "copy failed"; }
 
 move() { mv "$1" "$2" && ok "moved" || err "move failed"; }
@@ -174,13 +175,22 @@ edit() { nano "$1"; }
 
 whereami() { pwd; }
 
-hardware() { fastfetch; }
+sysinfo() {
+    echo -e "${FISH_HIGHLIGHT}"
+    echo "User: $USER"
+    echo "Shell: FISH v3"
+    echo "OS: $(uname -o)"
+    echo "Kernel: $(uname -r)"
+    echo "CPU: $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2)"
+    echo "RAM: $(free -h | awk '/Mem/ {print $3 "/" $2}')"
+    echo -e "${RESET}"
+}
 
 disks() { lsblk; }
 
 mdisks() { sudo fdisk -l; }
 
-ver() { echo "FISH v2 (2025)"; }
+info() { echo "FISH v3 (2025)"; }
 
 open() {
     [[ -z "$1" ]] && { err "file required"; return; }
@@ -194,30 +204,30 @@ open() {
 }
 
 help() {
-    echo "FISH v2 Commands:"
-    echo "  print <msg>"
-    echo "  makefile <name>"
-    echo "  makefolder <dir>"
-    echo "  goto <dir>"
-    echo "  goback <n>"
-    echo "  delete <file>"
-    echo "  view"
-    echo "  math <expr>"
-    echo "  install <pkg>"
-    echo "  get <url>"
-    echo "  run <file>"
-    echo "  edit <file>"
-    echo "  open <file>"
-    echo "  connect <user@host>"
-    echo "  hardware"
-    echo "  disks"
-    echo "  mdisks"
-    echo "  ver"
-    echo "  whereami"
-    echo "  close/exit"
-    echo "  clear     "
-    echo "  web <address>" 
-    echo " games"
+    echo "FISH v3 Commands:"
+    echo "  print <msg>" ## PRINTS MESSAGE ;;
+    echo "  makefile <name>" ## MAKES A FILE ;;
+    echo "  makefolder <dir>" ## MAKES A FOLDER ;;
+    echo "  goto <dir>" ## GOES TO A DIRECTORY ;;
+    echo "  goback <n>" ## GOES BACK n DIRECTORIES ;;
+    echo "  delete <file>" ## DELETES A FILE(s) ;;
+    echo "  view" ## VIEW DIRECTORY ;;
+    echo "  math <expr>" ## MATH ;; 
+    echo "  install <pkg>" ## INSTALL A PACKAGE/FILE ;; 
+    echo "  get <url>" ## SIMILAR TO GIT CLONE ( GITHUB REPO ) ;;  
+    echo "  execute <file>" ## AUTO COMPILES / EXECUTES FILE ;;
+    echo "  edit <file>" ## EDITS FILE IN NANO ;;
+    echo "  open <file>" ## OPENS A FILE ;;
+    echo "  connect <user@host>" ## CONNECTS TO COMPUTERS / SERVERS USING SSH ;;
+    echo "  sysinfo" ## SHOWS YOUR HARDWARE ;;
+    echo "  disks" ## SHOWS YOUR PARTITIONS USING LSBLK ;;
+    echo "  mdisks" ## MANAGE DISKS USING FDISK ;; 
+    echo "  info" ## INFORMATION ABOUT SHELL ;;
+    echo "  whereami" ## SHOWS YOUR CURRENT DIRECTORY ;; 
+    echo "  close/exit" ## CLOSES THE SHELL ;; 
+    echo "  clear     " ## CLEARS THE SCREEN ;;
+    echo "  web <address>" ## SURF THE WEB ;;
+    echo "  games" ## GAMES LIST
 }
 
 close() { exit 0; }
@@ -244,49 +254,57 @@ games() {
 
 # FISH SHELL ;;
 while true; do
+    
+
     echo -ne "${FISH_COLOR}⟦FISH⟧» ${RESET}"
+    read -r line
 
-    read -r -a parts
-    cmd="${parts[0]}"
-    args=("${parts[@]:1}")
+    line="$(echo "$line" | sed 's/^[ \t]*//;s/[ \t]*$//')"
 
-    if [ -z "$cmd" ]; then
+    [[ -z "$line" ]] && continue
+
+    if [[ "${line: -1}" != ";" ]]; then
+        err "missing semicolon ';'"
         continue
     fi
-        
-    case "$cmd" in
-        help) help ;;
-        print) print "${args[@]}" ;;
-        makefile) makefile "${args[@]}" ;;
-        makefolder) makefolder "${args[@]}" ;;
-        goto) goto "${args[@]}" ;;
-        goback) goback "${args[@]}" ;;
-        delete) delete "${args[@]}" ;;
-        view) view "${args[@]}" ;;
-        wait) wait "${args[@]}" ;;
-        math) math "${args[@]}" ;;
-        get) get "${args[@]}" ;;
-        install) install "${args[@]}" ;;
-        execute) execute "${args[@]}" ;;
-        copy) copy "${args[@]}" ;;
-        move) move "${args[@]}" ;;
-        connect) connect "${args[@]}" ;;
-        update) update ;;
-        hardware) hardware ;;
-        disks) disks ;;
-        mdisks) mdisks ;;
-        ver) ver ;;
-        edit) edit "${args[@]}" ;;
-        open) open "${args[@]}" ;;
-        whereami) whereami ;;
-        close|exit) close ;;
-        clear) clear ;;
-        web) web "${args[@]}" ;;
-        games) games ;;
-        *)
-          err "unknown command: $cmd"
-           ;;
 
+    line="${line%?}"
+     
+    CMD="$(echo "$line" | cut -d' ' -f1 | tr '[:lower:]' '[:upper:]')"
+    ARGS="$(echo "$line" | cut -d' ' -f2-)"
+
+    case "$CMD" in
+        PRINT) print $ARGS ;;
+        MAKEFILE) makefile $ARGS ;;
+        MAKEFOLDER) makefolder $ARGS ;;
+        GOTO) goto $ARGS ;;
+        GOBACK) goback $ARGS ;;
+        DELETE) delete $ARGS ;;
+        VIEW) view $ARGS ;;
+        WAIT) wait $ARGS ;;
+        MATH) math $ARGS ;;
+        GET) get $ARGS ;;
+        INSTALL) install $ARGS ;;
+        EXECUTE) execute $ARGS ;;
+        COPY) copy $ARGS ;;
+        MOVE) move $ARGS ;;
+        CONNECT) connect $ARGS ;;
+        UPDATE) update ;;
+        SYSINFO) sysinfo ;;
+        DISKS) disks ;;
+        MDISKS) mdisks ;;
+        EDIT) edit $ARGS ;;
+        OPEN) open $ARGS ;;
+        WHEREAMI) whereami ;;
+        CLOSE|EXIT) close ;;
+        CLEAR) clear ;;
+        WEB) web $ARGS ;;
+        GAMES) games ;;
+        UNINSTALL) uninstall $ARGS ;;
+        HELP) help ;;
+        *)
+            err "Unknown command: $CMD"
+            ;;
     esac
 done
 
