@@ -1,7 +1,17 @@
 ### FISH ###
-Fast Interactable SHell v3
+Fast Interactable SHell v4
 
 
-everything in capitals
-added ; for better uniqueness.
-better banner.
+added viewable directories, in shell.
+fixed ```view```
+commands are now all in caps and end in ; 
+eg.
+
+
+```EDIT hi;```
+
+
+```GOBACK 1;```
+
+
+``` EXECUTE hello.py; ```
