@@ -146,6 +146,12 @@ execute() {
         return
     fi
 
+    if [[ "$file" == *.cb ]]; then
+       cranberry run
+        return
+
+    fi
+
 }
 copy() { cp "$1" "$2" && ok "copied" || err "copy failed"; }
 move() { mv "$1" "$2" && ok "moved" || err "move failed"; }
